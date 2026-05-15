@@ -132,7 +132,7 @@ export default function Orders() {
                           <p className="text-xs text-gray-500">Cantidad: {detalle.cantidad}</p>
                         </div>
                         <p className="text-sm font-bold text-gray-700">
-                           ${Number(detalle.precioUnitario * detalle.cantidad).toFixed(2)}
+                           ${Number((producto?.precio || 0) * detalle.cantidad).toFixed(2)}
                            </p>
                       </div>
                     );
