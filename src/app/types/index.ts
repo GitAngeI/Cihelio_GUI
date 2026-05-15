@@ -1,0 +1,173 @@
+// ============================================================================
+// TIPOS DE DATOS - Sistema de Gestión de Tienda de Globos
+// Basado en el Diagrama Entidad-Relación
+// ============================================================================
+
+// Tipos compuestos
+export interface Nombre {
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+}
+
+export interface Direccion {
+  calle: string;
+  numero: string;
+  ciudad: string;
+}
+
+// ============================================================================
+// USUARIOS
+// ============================================================================
+
+export interface Usuario {
+  usuarioID: number;
+  nombre: Nombre;
+  correo: string;
+  contraseña: string;
+}
+
+export interface Administrador extends Usuario {
+  nivel_acceso?: string;
+}
+
+export interface Cliente {
+  clienteID: number; // Puede ser FK de Usuario
+  nombre: Nombre;
+  correo: string;
+  telefono: string;
+  direccion: Direccion;
+}
+
+// ============================================================================
+// PRODUCTOS Y CATEGORÍAS
+// ============================================================================
+
+export interface Categoria {
+  categoriaID: number;
+  nombre: string;
+}
+
+export interface Producto {
+  productoID: number;
+  nombre: string;
+  precio: number;
+  stock: number;
+  tipo: string;
+  categoriaID: number;
+}
+
+// ============================================================================
+// PEDIDOS
+// ============================================================================
+
+export type EstadoPedido =
+  | "Pendiente"
+  | "En Proceso"
+  | "Completado"
+  | "Cancelado"
+  | "Entregado";
+
+export interface Pedido {
+  pedidoID: number;
+  fecha: string;
+  total: number;
+  estado: EstadoPedido;
+  clienteID: number;
+}
+
+export interface DetallePedido {
+  pedidoID: number;
+  productoID: number;
+  cantidad: number;
+  precio_venta: number;
+  subtotal: number;
+}
+
+// ============================================================================
+// PAGOS
+// ============================================================================
+
+export type TipoPago =
+  | "Efectivo"
+  | "Tarjeta"
+  | "Transferencia"
+  | "Otro";
+export type EstadoPago =
+  | "Pendiente"
+  | "Completado"
+  | "Rechazado"
+  | "Reembolsado";
+
+export interface Pago {
+  pagoID: number;
+  tipo: TipoPago;
+  monto: number;
+  fecha: string;
+  estado: EstadoPago;
+  pedidoID: number;
+}
+
+// ============================================================================
+// PROVEEDORES Y COMPRAS
+// ============================================================================
+
+export interface Proveedor {
+  proveedorID: number;
+  empresa: string;
+  telefono: string;
+  direccion: Direccion;
+}
+
+export type EstadoCompra =
+  | "Pendiente"
+  | "En Proceso"
+  | "Recibida"
+  | "Cancelada";
+
+export interface Compra {
+  compraID: number;
+  fecha: string;
+  estado: EstadoCompra;
+  total: number;
+  proveedorID: number;
+  usuarioID: number; // Usuario que realizó la compra
+}
+
+export interface DetalleCompra {
+  compraID: number;
+  productoID: number;
+  cantidad: number;
+  costo_unitario: number;
+  unidad_medida: string;
+}
+
+// ============================================================================
+// TIPOS EXTENDIDOS CON RELACIONES (Para las vistas)
+// ============================================================================
+
+export interface PedidoConDetalles extends Pedido {
+  cliente?: Cliente;
+  detalles?: (DetallePedido & { producto?: Producto })[];
+  pago?: Pago;
+}
+
+export interface CompraConDetalles extends Compra {
+  proveedor?: Proveedor;
+  usuario?: Usuario;
+  detalles?: (DetalleCompra & { producto?: Producto })[];
+}
+
+export interface ProductoConCategoria extends Producto {
+  categoria?: Categoria;
+}
+
+// ============================================================================
+// TIPOS PARA CARRITO DE COMPRAS (Cliente)
+// ============================================================================
+
+export interface ItemCarrito {
+  producto: Producto;
+  cantidad: number;
+  subtotal: number;
+}
