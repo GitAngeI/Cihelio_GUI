@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart, CheckCircle } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { productos, getCategoriaById } from '../../data/mockData';
 import { Producto } from '../../types';
@@ -22,21 +22,30 @@ const productImages: {[key: number]: string} = {
 
 export default function Catalog() {
   const [cart, setCart] = useState<{[key: number]: number}>({});
+  
+  // Variables para controlar la notificación flotante (Toast)
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
-  const addToCart = (productId: number) => {
+  const addToCart = (productId: number, productName: string) => {
     setCart(prev => ({
       ...prev,
       [productId]: (prev[productId] || 0) + 1
     }));
+    
+    // Mostramos la notificación por 3 segundos
+    setToastMessage(`¡${productName} agregado al carrito!`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
   return (
-    <div>
+    <div className="relative">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Catálogo de Globos</h1>
-        <div className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm">
           <ShoppingCart className="w-5 h-5" />
           <span className="font-semibold">{cartCount} productos</span>
         </div>
@@ -67,15 +76,16 @@ export default function Catalog() {
                     <p className="text-xs text-gray-500">Stock: {product.stock}</p>
                   </div>
                   <button
-                    onClick={() => addToCart(product.productoID)}
-                    className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
+                    onClick={() => addToCart(product.productoID, product.nombre)}
+                    className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors shadow-sm"
                     disabled={product.stock === 0}
+                    title="Agregar al carrito"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
                 {cart[product.productoID] && (
-                  <div className="mt-2 text-center bg-green-100 text-green-700 py-1 rounded text-sm">
+                  <div className="mt-3 text-center bg-green-50 text-green-700 border border-green-100 py-1 rounded text-sm font-medium">
                     {cart[product.productoID]} en el carrito
                   </div>
                 )}
@@ -84,6 +94,14 @@ export default function Catalog() {
           );
         })}
       </div>
+
+      {/* NOTIFICACIÓN FLOTANTE (TOAST) */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in-up z-50">
+          <CheckCircle className="w-5 h-5" />
+          <span className="font-medium">{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
