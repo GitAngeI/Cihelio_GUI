@@ -1,16 +1,23 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, X } from 'lucide-react';
 import { productos, getCategoriaById } from '../../data/mockData';
 import { Producto } from '../../types';
 
 export default function EmployeeProducts() {
   const [productsList] = useState<Producto[]>(productos);
 
+  // Variables para controlar las ventanas emergentes del Empleado
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Producto | null>(null);
+
   return (
-    <div>
+    <div className="relative">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">PRODUCTOS</h1>
-        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-gray-800">INVENTARIO DE PRODUCTOS</h1>
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm"
+        >
           <Plus className="w-5 h-5" />
           Agregar Producto
         </button>
@@ -34,7 +41,7 @@ export default function EmployeeProducts() {
               const categoria = getCategoriaById(product.categoriaID);
               
               return (
-                <tr key={product.productoID} className="hover:bg-gray-50">
+                <tr key={product.productoID} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 font-semibold text-gray-800">{product.productoID}</td>
                   <td className="px-6 py-4 text-gray-600">{product.nombre}</td>
                   <td className="px-6 py-4 text-gray-600">{product.tipo}</td>
@@ -52,16 +59,14 @@ export default function EmployeeProducts() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1">
-                        <Edit className="w-4 h-4" />
-                        Editar
-                      </button>
-                      <button className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1">
-                        <Trash2 className="w-4 h-4" />
-                        Eliminar
-                      </button>
-                    </div>
+                    <button 
+                      onClick={() => setEditingProduct(product)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Editar
+                    </button>
+                    {/* Botón de eliminar removido intencionalmente para el rol de empleado */}
                   </td>
                 </tr>
               );
@@ -69,6 +74,94 @@ export default function EmployeeProducts() {
           </tbody>
         </table>
       </div>
+
+      {/* VENTANA 1: AGREGAR PRODUCTO (Empleado) */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300">
+            <div className="bg-green-600 p-4 flex justify-between items-center text-white">
+              <h2 className="text-xl font-bold">Registrar Nuevo Producto</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="hover:bg-green-700 p-1 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setIsAddModalOpen(false); }}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                <input type="text" placeholder="Ej. Globo Metálico Estrella" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                  <input type="text" placeholder="Ej. Metálico" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría ID</label>
+                  <input type="number" placeholder="Ej. 1" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+                  <input type="number" step="0.01" placeholder="0.00" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Stock Inicial</label>
+                  <input type="number" placeholder="0" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* VENTANA 2: EDITAR PRODUCTO (Empleado) */}
+      {editingProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-300">
+            <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
+              <h2 className="text-xl font-bold">Actualizar Producto</h2>
+              <button onClick={() => setEditingProduct(null)} className="hover:bg-blue-700 p-1 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setEditingProduct(null); }}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                <input type="text" defaultValue={editingProduct.nombre} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                  <input type="text" defaultValue={editingProduct.tipo} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría ID</label>
+                  <input type="number" defaultValue={editingProduct.categoriaID} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+                  <input type="number" step="0.01" defaultValue={editingProduct.precio} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                  <input type="number" defaultValue={editingProduct.stock} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
+                <button type="button" onClick={() => setEditingProduct(null)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">Actualizar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
