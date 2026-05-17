@@ -53,13 +53,13 @@ export default function Catalog() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {productos.map((product) => {
-          const categoria = getCategoriaById(product.categoriaID);
+          const categoria = getCategoriaById(product.categoriaid);
           
           return (
-            <div key={product.productoID} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+            <div key={product.productoid} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
               <div className="h-48 overflow-hidden bg-gray-200">
                 <ImageWithFallback
-                  src={productImages[product.productoID] || productImages[1]}
+                  src={productImages[product.productoid] || productImages[1]}
                   alt={product.nombre}
                   className="w-full h-full object-cover"
                 />
@@ -76,7 +76,7 @@ export default function Catalog() {
                     <p className="text-xs text-gray-500">Stock: {product.stock}</p>
                   </div>
                   <button
-                    onClick={() => addToCart(product.productoID, product.nombre)}
+                    onClick={() => addToCart(product.productoid, product.nombre)}
                     className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors shadow-sm"
                     disabled={product.stock === 0}
                     title="Agregar al carrito"
@@ -84,9 +84,9 @@ export default function Catalog() {
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
-                {cart[product.productoID] && (
+                {cart[product.productoid] && (
                   <div className="mt-3 text-center bg-green-50 text-green-700 border border-green-100 py-1 rounded text-sm font-medium">
-                    {cart[product.productoID]} en el carrito
+                    {cart[product.productoid]} en el carrito
                   </div>
                 )}
               </div>

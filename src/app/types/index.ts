@@ -32,7 +32,7 @@ export interface Administrador extends Usuario {
 }
 
 export interface Cliente {
-  clienteID: number; // Puede ser FK de Usuario
+  clienteid: number; // Puede ser FK de Usuario
   nombre: Nombre;
   correo: string;
   telefono: string;
@@ -49,12 +49,12 @@ export interface Categoria {
 }
 
 export interface Producto {
-  productoID: number;
+  productoid: number;
   nombre: string;
   precio: number;
   stock: number;
   tipo: string;
-  categoriaID: number;
+  categoriaid: number;
 }
 
 // ============================================================================

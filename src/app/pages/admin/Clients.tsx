@@ -32,18 +32,16 @@ export default function AdminClients() {
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Teléfono</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Correo</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Dirección</th>
               <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {clientsList.map((client) => (
-              <tr key={client.clienteID} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-semibold text-gray-800">{client.clienteID}</td>
+              <tr key={client.clienteid} className="hover:bg-gray-50">
+                <td className="px-6 py-4 font-semibold text-gray-800">{client.clienteid}</td>
                 <td className="px-6 py-4 text-gray-600">{getNombreCompleto(client.nombre)}</td>
                 <td className="px-6 py-4 text-gray-600">{client.telefono}</td>
                 <td className="px-6 py-4 text-gray-600">{client.correo}</td>
-                <td className="px-6 py-4 text-gray-600">{getDireccionCompleta(client.direccion)}</td>
                 <td className="px-6 py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button 
@@ -97,10 +95,6 @@ export default function AdminClients() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                 <input type="email" placeholder="ejemplo@correo.com" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Completa</label>
-                <textarea rows={2} placeholder="Ej. Av. Principal #123, Ciudad de México" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none"></textarea>
-              </div>
               <div className="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
                 <button type="submit" className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm">Guardar Cliente</button>
@@ -124,7 +118,7 @@ export default function AdminClients() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
-                  <input type="text" defaultValue={editingClient.clienteID} disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none text-gray-500" />
+                  <input type="text" defaultValue={editingClient.clienteid} disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none text-gray-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
@@ -138,10 +132,6 @@ export default function AdminClients() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                 <input type="email" defaultValue={editingClient.correo} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Completa</label>
-                <textarea rows={2} defaultValue={getDireccionCompleta(editingClient.direccion)} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
               </div>
               <div className="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
                 <button type="button" onClick={() => setEditingClient(null)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
