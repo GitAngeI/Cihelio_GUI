@@ -1,15 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, AlertTriangle } from 'lucide-react';
-import { clientes, getNombreCompleto, getDireccionCompleta } from '../../data/mockData';
-import { Cliente } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminClients() {
-  const [clientsList] = useState<Cliente[]>(clientes);
+  const [clientsList, setClientsList] = useState<any[]>([]);
 
-  // Variables para controlar las ventanas emergentes
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState<Cliente | null>(null);
-  const [deletingClient, setDeletingClient] = useState<Cliente | null>(null);
+  const [editingClient, setEditingClient] = useState<any | null>(null);
+  const [deletingClient, setDeletingClient] = useState<any | null>(null);
+
+// 1. LEER (READ)
+  const fetchClientes = async () => {
+    const { data } = await supabase.from('cliente').select('*').order('clienteid', { ascending: true });
+    if (data) setClientsList(data);
+  };
+
+  useEffect(() => {
+    fetchClientes();
+  }, []);
+
+  // 2. CREAR (CREATE)
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const nuevoCliente = {
+      nombre: formData.get('nombre'),
+      telefono: formData.get('telefono'),
+      correo: formData.get('correo')
+    };
+
+    await supabase.from('cliente').insert([nuevoCliente]);
+    setIsAddModalOpen(false);
+    fetchClientes(); 
+  };
+
+  // 3. ACTUALIZAR (UPDATE)
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const datosActualizados = {
+      nombre: formData.get('nombre'),
+      telefono: formData.get('telefono'),
+      correo: formData.get('correo')
+    };
+
+    await supabase.from('cliente').update(datosActualizados).eq('clienteid', editingClient.clienteid);
+    setEditingClient(null);
+    fetchClientes();
+  };
+
+  // 4. ELIMINAR (DELETE)
+  const handleDelete = async () => {
+    await supabase.from('cliente').delete().eq('clienteid', deletingClient.clienteid);
+    setDeletingClient(null);
+    fetchClientes();
+  };
 
   return (
     <div className="relative">
@@ -39,24 +86,16 @@ export default function AdminClients() {
             {clientsList.map((client) => (
               <tr key={client.clienteid} className="hover:bg-gray-50">
                 <td className="px-6 py-4 font-semibold text-gray-800">{client.clienteid}</td>
-                <td className="px-6 py-4 text-gray-600">{getNombreCompleto(client.nombre)}</td>
+                <td className="px-6 py-4 text-gray-600">{client.nombre}</td>
                 <td className="px-6 py-4 text-gray-600">{client.telefono}</td>
                 <td className="px-6 py-4 text-gray-600">{client.correo}</td>
                 <td className="px-6 py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button 
-                      onClick={() => setEditingClient(client)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Editar
+                    <button onClick={() => setEditingClient(client)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors">
+                      <Edit className="w-4 h-4" /> Editar
                     </button>
-                    <button 
-                      onClick={() => setDeletingClient(client)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Eliminar
+                    <button onClick={() => setDeletingClient(client)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors">
+                      <Trash2 className="w-4 h-4" /> Eliminar
                     </button>
                   </div>
                 </td>
@@ -66,108 +105,80 @@ export default function AdminClients() {
         </table>
       </div>
 
-      {/* 1. VENTANA: AGREGAR CLIENTE */}
+{/* MODAL AGREGAR */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-green-600 p-4 flex justify-between items-center text-white">
               <h2 className="text-xl font-bold">Agregar Cliente</h2>
-              <button onClick={() => setIsAddModalOpen(false)} className="hover:bg-green-700 p-1 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setIsAddModalOpen(false)} className="hover:bg-green-700 p-1 rounded-full"><X className="w-5 h-5" /></button>
             </div>
-            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setIsAddModalOpen(false); }}>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ID del Cliente</label>
-                  <input type="text" placeholder="Autogenerado" disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input type="text" placeholder="Ej. 555-0101" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
-                </div>
-              </div>
+            <form className="p-6 space-y-4" onSubmit={handleCreate}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                <input type="text" placeholder="Ej. Ana Martínez Hernández" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+                <input required name="nombre" type="text" placeholder="Ej. Ana Martínez Hernández" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                <input type="email" placeholder="ejemplo@correo.com" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <input name="telefono" placeholder="81-1234-5678" type="text" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+                  <input required name="correo" placeholder="correo@example.com" type="email" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
               </div>
-              <div className="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
-                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
-                <button type="submit" className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm">Guardar Cliente</button>
+              <div className="flex justify-end gap-3 mt-4 pt-2 border-t">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-white bg-green-600 rounded-lg">Guardar</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* 2. VENTANA: EDITAR CLIENTE */}
+     {/* MODAL EDITAR */}
       {editingClient && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
               <h2 className="text-xl font-bold">Editar Cliente</h2>
-              <button onClick={() => setEditingClient(null)} className="hover:bg-blue-700 p-1 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setEditingClient(null)} className="hover:bg-blue-700 p-1 rounded-full"><X className="w-5 h-5" /></button>
             </div>
-            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setEditingClient(null); }}>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
-                  <input type="text" defaultValue={editingClient.clienteid} disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none text-gray-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input type="text" defaultValue={editingClient.telefono} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-              </div>
+            <form className="p-6 space-y-4" onSubmit={handleUpdate}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                <input type="text" defaultValue={getNombreCompleto(editingClient.nombre)} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input required name="nombre" defaultValue={editingClient.nombre} type="text" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                <input type="email" defaultValue={editingClient.correo} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <input name="telefono" defaultValue={editingClient.telefono} type="text" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+                  <input required name="correo" defaultValue={editingClient.correo} type="email" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
               </div>
-              <div className="flex justify-end gap-3 mt-4 pt-2 border-t border-gray-100">
-                <button type="button" onClick={() => setEditingClient(null)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
-                <button type="submit" className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">Actualizar Cliente</button>
+              <div className="flex justify-end gap-3 mt-4 pt-2 border-t">
+                <button type="button" onClick={() => setEditingClient(null)} className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancelar</button>
+                <button type="submit" className="px-4 py-2 text-white bg-blue-600 rounded-lg">Actualizar</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* 3. VENTANA: ELIMINAR CLIENTE */}
+{/* MODAL ELIMINAR */}
       {deletingClient && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="bg-red-100 p-3 rounded-full text-red-600">
-                <AlertTriangle className="w-8 h-8" />
-              </div>
-            </div>
+            <div className="flex justify-center mb-4"><div className="bg-red-100 p-3 rounded-full text-red-600"><AlertTriangle className="w-8 h-8" /></div></div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">¿Eliminar Cliente?</h2>
-            <p className="text-gray-600 mb-6">
-              Estás a punto de eliminar a <strong>{getNombreCompleto(deletingClient.nombre)}</strong> del sistema. Esta acción no se puede deshacer.
-            </p>
+            <p className="text-gray-600 mb-6">Estás a punto de eliminar a <strong>{deletingClient.nombre}</strong>.</p>
             <div className="flex justify-center gap-3">
-              <button 
-                onClick={() => setDeletingClient(null)} 
-                className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors w-full"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={() => setDeletingClient(null)} 
-                className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm w-full"
-              >
-                Eliminar
-              </button>
+              <button onClick={() => setDeletingClient(null)} className="px-4 py-2 bg-gray-200 rounded-lg w-full">Cancelar</button>
+              <button onClick={handleDelete} className="px-4 py-2 text-white bg-red-600 rounded-lg w-full">Eliminar</button>
             </div>
           </div>
         </div>
