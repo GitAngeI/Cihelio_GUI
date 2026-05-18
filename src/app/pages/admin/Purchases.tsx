@@ -1,16 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, X, AlertTriangle } from 'lucide-react';
-import { compras, getProveedorById, getUsuarioById, getNombreCompleto } from '../../data/mockData';
-import { Compra } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminPurchases() {
-  const [purchasesList] = useState<Compra[]>(compras);
+  const [purchasesList, setPurchasesList] = useState<any[]>([]);
 
-  // Variables para controlar las 4 ventanas emergentes
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [viewingPurchase, setViewingPurchase] = useState<Compra | null>(null);
-  const [editingPurchase, setEditingPurchase] = useState<Compra | null>(null);
-  const [deletingPurchase, setDeletingPurchase] = useState<Compra | null>(null);
+  const [viewingPurchase, setViewingPurchase] = useState<any | null>(null);
+  const [editingPurchase, setEditingPurchase] = useState<any | null>(null);
+  const [deletingPurchase, setDeletingPurchase] = useState<any | null>(null);
+
+  // 1. LEER COMPRAS
+  const fetchCompras = async () => {
+    const { data } = await supabase
+      .from('compra')
+      .select('*, proveedor(empresa), usuario(nombre)')
+      .order('compraid', { ascending: true });
+    if (data) setPurchasesList(data);
+  };
+
+  useEffect(() => {
+    fetchCompras();
+  }, []);
+
+  // 2. CREAR COMPRA
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const nuevaCompra = {
+      proveedorid: formData.get('proveedorid') ? parseInt(formData.get('proveedorid') as string) : null,
+      usuarioid: formData.get('usuarioid') ? parseInt(formData.get('usuarioid') as string) : null,
+      fecha: formData.get('fecha'),
+      total: parseFloat(formData.get('total') as string),
+      estado: formData.get('estado')
+    };
+    await supabase.from('compra').insert([nuevaCompra]);
+    setIsAddModalOpen(false);
+    fetchCompras();
+  };
+
+  // 3. ACTUALIZAR COMPRA
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const datosActualizados = {
+      proveedorid: formData.get('proveedorid') ? parseInt(formData.get('proveedorid') as string) : null,
+      usuarioid: formData.get('usuarioid') ? parseInt(formData.get('usuarioid') as string) : null,
+      fecha: formData.get('fecha'),
+      total: parseFloat(formData.get('total') as string),
+      estado: formData.get('estado')
+    };
+    await supabase.from('compra').update(datosActualizados).eq('compraid', editingPurchase.compraid);
+    setEditingPurchase(null);
+    fetchCompras();
+  };
+
+  // 4. ELIMINAR COMPRA
+  const handleDelete = async () => {
+    await supabase.from('compra').delete().eq('compraid', deletingPurchase.compraid);
+    setDeletingPurchase(null);
+    fetchCompras();
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -26,12 +76,8 @@ export default function AdminPurchases() {
     <div className="relative">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">COMPRAS</h1>
-        <button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition-colors shadow-sm"
-        >
-          <Plus className="w-5 h-5" />
-          Nueva Compra
+        <button onClick={() => setIsAddModalOpen(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 transition-colors">
+          <Plus className="w-5 h-5" /> Nueva Compra
         </button>
       </div>
 
@@ -49,227 +95,130 @@ export default function AdminPurchases() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {purchasesList.map((purchase) => {
-              const proveedor = getProveedorById(purchase.proveedorid);
-              const usuario = getUsuarioById(purchase.usuarioid);
-              
-              return (
-                <tr key={purchase.compraid} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold text-gray-800">{purchase.compraid}</td>
-                  <td className="px-6 py-4 text-gray-600">{proveedor?.empresa}</td>
-                  <td className="px-6 py-4 text-gray-600">{new Date(purchase.fecha).toLocaleDateString('es-MX')}</td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {usuario ? getNombreCompleto(usuario.nombre) : '-'}
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold text-green-600">
-                    ${purchase.total.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(purchase.estado)}`}>
-                      {purchase.estado}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button 
-                        onClick={() => setViewingPurchase(purchase)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                        Ver
-                      </button>
-                      <button 
-                        onClick={() => setEditingPurchase(purchase)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Editar
-                      </button>
-                      <button 
-                        onClick={() => setDeletingPurchase(purchase)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {purchasesList.map((purchase) => (
+              <tr key={purchase.compraid} className="hover:bg-gray-50">
+                <td className="px-6 py-4 font-semibold text-gray-800">{purchase.compraid}</td>
+                <td className="px-6 py-4 text-gray-600">{purchase.proveedor?.empresa || `ID: ${purchase.proveedorid}`}</td>
+                <td className="px-6 py-4 text-gray-600">{new Date(purchase.fecha).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
+                <td className="px-6 py-4 text-gray-600">{purchase.usuario?.nombre || `ID: ${purchase.usuarioid}`}</td>
+                <td className="px-6 py-4 text-right font-semibold text-green-600">${Number(purchase.total).toFixed(2)}</td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(purchase.estado)}`}>
+                    {purchase.estado}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button onClick={() => setViewingPurchase(purchase)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1">
+                      <Eye className="w-4 h-4" /> Ver
+                    </button>
+                    <button onClick={() => setEditingPurchase(purchase)} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1">
+                      <Edit className="w-4 h-4" /> Editar
+                    </button>
+                    <button onClick={() => setDeletingPurchase(purchase)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm inline-flex items-center gap-1">
+                      <Trash2 className="w-4 h-4" /> Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* 1. VENTANA: NUEVA COMPRA */}
+      {/* MODAL CREAR */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-green-600 p-4 flex justify-between items-center text-white">
-              <h2 className="text-xl font-bold">Registrar Nueva Compra</h2>
-              <button onClick={() => setIsAddModalOpen(false)} className="hover:bg-green-700 p-1 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <h2 className="text-xl font-bold">Registrar Compra</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="hover:bg-green-700 p-1 rounded-full"><X className="w-5 h-5" /></button>
             </div>
-            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setIsAddModalOpen(false); }}>
+            <form className="p-6 space-y-4" onSubmit={handleCreate}>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Compra ID</label>
-                  <input type="text" placeholder="Autogenerado" disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                  <input type="date" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
-                </div>
+                <div><label className="block text-sm font-medium mb-1">Proveedor ID</label><input required name="proveedorid" type="number" className="w-full border p-2 rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1">Usuario ID</label><input required name="usuarioid" type="number" className="w-full border p-2 rounded-lg" /></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor ID</label>
-                  <input type="text" placeholder="Ej. 1" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Usuario ID</label>
-                  <input type="text" placeholder="Ej. 2" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
-                </div>
+                <div><label className="block text-sm font-medium mb-1">Total ($)</label><input required name="total" type="number" step="0.01" className="w-full border p-2 rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1">Fecha</label><input required name="fecha" type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full border p-2 rounded-lg" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Total ($)</label>
-                  <input type="number" step="0.01" placeholder="0.00" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                  <select className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none">
-                    <option>Pendiente</option>
-                    <option>En Proceso</option>
-                    <option>Recibida</option>
-                    <option>Cancelada</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Estado</label>
+                <select name="estado" className="w-full border p-2 rounded-lg">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="En Proceso">En Proceso</option>
+                  <option value="Recibida">Recibida</option>
+                  <option value="Cancelada">Cancelada</option>
+                </select>
               </div>
-              <div className="flex justify-end gap-3 mt-4">
-                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
-                <button type="submit" className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm">Guardar Compra</button>
-              </div>
+              <div className="flex justify-end gap-3 mt-4"><button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg">Cancelar</button><button type="submit" className="px-4 py-2 text-white bg-green-600 rounded-lg">Guardar</button></div>
             </form>
           </div>
         </div>
       )}
 
-      {/* 2. VENTANA: VER COMPRA */}
+     {/* MODAL VER DETALLE */}
       {viewingPurchase && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="bg-green-600 p-4 flex justify-between items-center text-white">
-              <h2 className="text-xl font-bold">Detalle de Compra #{viewingPurchase.compraid}</h2>
-              <button onClick={() => setViewingPurchase(null)} className="hover:bg-green-700 p-1 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            <div className="bg-green-600 p-4 flex justify-between items-center text-white"><h2 className="text-xl font-bold">Detalle de Compra</h2><button onClick={() => setViewingPurchase(null)}><X className="w-5 h-5" /></button></div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Proveedor ID</p>
-                  <p className="text-gray-800">{viewingPurchase.proveedorid}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Usuario ID (Solicitante)</p>
-                  <p className="text-gray-800">{viewingPurchase.usuarioid}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Total</p>
-                  <p className="text-green-600 font-semibold">${viewingPurchase.total.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Fecha</p>
-                  <p className="text-gray-800">{new Date(viewingPurchase.fecha).toLocaleDateString('es-MX')}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-gray-500 font-medium">Estado</p>
-                  <span className={`inline-flex items-center mt-1 px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(viewingPurchase.estado)}`}>
-                    {viewingPurchase.estado}
-                  </span>
-                </div>
+                <div><p className="text-sm text-gray-500">Proveedor</p><p>{viewingPurchase.proveedor?.empresa}</p></div>
+                <div><p className="text-sm text-gray-500">Usuario (Solicitante)</p><p>{viewingPurchase.usuario?.nombre}</p></div>
+                <div><p className="text-sm text-gray-500">Total</p><p className="text-green-600 font-semibold">${Number(viewingPurchase.total).toFixed(2)}</p></div>
+                <div><p className="text-sm text-gray-500">Fecha</p><p>{new Date(viewingPurchase.fecha).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</p></div>
+                <div className="col-span-2"><p className="text-sm text-gray-500">Estado</p><span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(viewingPurchase.estado)}`}>{viewingPurchase.estado}</span></div>
               </div>
-              <div className="flex justify-end mt-4">
-                <button onClick={() => setViewingPurchase(null)} className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm">Cerrar</button>
-              </div>
+              <div className="flex justify-end"><button onClick={() => setViewingPurchase(null)} className="px-4 py-2 text-white bg-green-600 rounded-lg">Cerrar</button></div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. VENTANA: EDITAR COMPRA */}
+      {/* MODAL EDITAR */}
       {editingPurchase && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
               <h2 className="text-xl font-bold">Editar Compra #{editingPurchase.compraid}</h2>
-              <button onClick={() => setEditingPurchase(null)} className="hover:bg-blue-700 p-1 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setEditingPurchase(null)} className="hover:bg-blue-700 p-1 rounded-full"><X className="w-5 h-5" /></button>
             </div>
-            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setEditingPurchase(null); }}>
+            <form className="p-6 space-y-4" onSubmit={handleUpdate}>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor ID</label>
-                  <input type="text" defaultValue={editingPurchase.proveedorid} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Usuario ID</label>
-                  <input type="text" defaultValue={editingPurchase.usuarioid} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
+                <div><label className="block text-sm font-medium mb-1">Proveedor ID</label><input required name="proveedorid" defaultValue={editingPurchase.proveedorid} type="number" className="w-full border p-2 rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1">Usuario ID</label><input required name="usuarioid" defaultValue={editingPurchase.usuarioid} type="number" className="w-full border p-2 rounded-lg" /></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Total ($)</label>
-                  <input type="number" step="0.01" defaultValue={editingPurchase.total} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                  <select defaultValue={editingPurchase.estado} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option>Pendiente</option>
-                    <option>En Proceso</option>
-                    <option>Recibida</option>
-                    <option>Cancelada</option>
-                  </select>
-                </div>
+                <div><label className="block text-sm font-medium mb-1">Total ($)</label><input required name="total" defaultValue={editingPurchase.total} type="number" step="0.01" className="w-full border p-2 rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1">Fecha</label><input required name="fecha" defaultValue={editingPurchase.fecha} type="date" className="w-full border p-2 rounded-lg" /></div>
               </div>
-              <div className="flex justify-end gap-3 mt-4">
-                <button type="button" onClick={() => setEditingPurchase(null)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancelar</button>
-                <button type="submit" className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">Actualizar</button>
+              <div>
+                <label className="block text-sm font-medium mb-1">Estado</label>
+                <select name="estado" defaultValue={editingPurchase.estado} className="w-full border p-2 rounded-lg">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="En Proceso">En Proceso</option>
+                  <option value="Recibida">Recibida</option>
+                  <option value="Cancelada">Cancelada</option>
+                </select>
               </div>
+              <div className="flex justify-end gap-3 mt-4"><button type="button" onClick={() => setEditingPurchase(null)} className="px-4 py-2 bg-gray-100 rounded-lg">Cancelar</button><button type="submit" className="px-4 py-2 text-white bg-blue-600 rounded-lg">Actualizar</button></div>
             </form>
           </div>
         </div>
       )}
 
-      {/* 4. VENTANA: ELIMINAR COMPRA */}
+      {/* MODAL ELIMINAR */}
       {deletingPurchase && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="bg-red-100 p-3 rounded-full text-red-600">
-                <AlertTriangle className="w-8 h-8" />
-              </div>
-            </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">¿Eliminar Compra?</h2>
-            <p className="text-gray-600 mb-6">
-              Estás a punto de eliminar la compra <strong>#{deletingPurchase.compraid}</strong> por <strong>${deletingPurchase.total.toFixed(2)}</strong>. Esta acción no se puede deshacer.
-            </p>
+            <div className="flex justify-center mb-4"><div className="bg-red-100 p-3 rounded-full text-red-600"><AlertTriangle className="w-8 h-8" /></div></div>
+            <h2 className="text-xl font-bold mb-2">¿Eliminar Compra?</h2>
+            <p className="text-gray-600 mb-6">Se eliminará la compra <strong>#{deletingPurchase.compraid}</strong> por <strong>${deletingPurchase.total.toFixed(2)}</strong>.</p>
             <div className="flex justify-center gap-3">
-              <button 
-                onClick={() => setDeletingPurchase(null)} 
-                className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors w-full"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={() => setDeletingPurchase(null)} 
-                className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm w-full"
-              >
-                Eliminar
-              </button>
+              <button onClick={() => setDeletingPurchase(null)} className="px-4 py-2 bg-gray-200 rounded-lg w-full">Cancelar</button>
+              <button onClick={handleDelete} className="px-4 py-2 text-white bg-red-600 rounded-lg w-full">Eliminar</button>
             </div>
           </div>
         </div>
