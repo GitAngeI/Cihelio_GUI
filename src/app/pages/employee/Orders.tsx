@@ -50,11 +50,11 @@ export default function EmployeeOrders() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {ordersList.map((order) => {
-              const cliente = getClienteById(order.clienteID);
+              const cliente = getClienteById(order.clienteid);
               
               return (
-                <tr key={order.pedidoID} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-gray-800">{order.pedidoID}</td>
+                <tr key={order.pedidoid} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-semibold text-gray-800">{order.pedidoid}</td>
                   <td className="px-6 py-4 text-gray-600">
                     {cliente ? getNombreCompleto(cliente.nombre) : '-'}
                   </td>
@@ -102,7 +102,7 @@ export default function EmployeeOrders() {
                   <Package className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Pedido #{viewingOrder.pedidoID}</h2>
+                  <h2 className="text-xl font-bold">Pedido #{viewingOrder.pedidoid}</h2>
                   <p className="text-xs text-blue-100">Detalles de preparación</p>
                 </div>
               </div>
@@ -138,8 +138,8 @@ export default function EmployeeOrders() {
                   Artículos a preparar
                 </h3>
                 <div className="max-h-48 overflow-y-auto pr-2 space-y-2">
-                  {getDetallesPorPedido(viewingOrder.pedidoID).map((detalle, idx) => {
-                    const producto = productos.find(p => p.productoID === detalle.productoID);
+                  {getDetallesPorPedido(viewingOrder.pedidoid).map((detalle, idx) => {
+                    const producto = productos.find(p => p.productoid === detalle.productoid);
                     return (
                       <div key={idx} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50">
                         <div>
@@ -176,7 +176,7 @@ export default function EmployeeOrders() {
             <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setUpdatingOrder(null); }}>
               <div>
                 <p className="text-sm text-gray-500 mb-4">
-                  Modificando el pedido <strong className="text-gray-800">#{updatingOrder.pedidoID}</strong>
+                  Modificando el pedido <strong className="text-gray-800">#{updatingOrder.pedidoid}</strong>
                 </p>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Nuevo Estado:</label>
                 <select 

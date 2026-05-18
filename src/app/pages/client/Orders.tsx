@@ -15,7 +15,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null);
   
   // Filtrar solo los pedidos del cliente actual (clienteID: 1 para ejemplo)
-  const clientOrders = pedidos.filter(p => p.clienteID === 1);
+  const clientOrders = pedidos.filter(p => p.clienteid === 1);
 
   return (
     <div className="relative">
@@ -41,12 +41,12 @@ export default function Orders() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {clientOrders.map((order) => {
-                const detalles = getDetallesPorPedido(order.pedidoID);
+                const detalles = getDetallesPorPedido(order.pedidoid);
                 const totalItems = detalles.reduce((sum, d) => sum + d.cantidad, 0);
                 
                 return (
-                  <tr key={order.pedidoID} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-gray-800">#{order.pedidoID}</td>
+                  <tr key={order.pedidoid} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-gray-800">#{order.pedidoid}</td>
                     <td className="px-6 py-4 text-gray-600">{new Date(order.fecha).toLocaleDateString('es-MX')}</td>
                     <td className="px-6 py-4 text-gray-600">{totalItems} productos</td>
                     <td className="px-6 py-4 text-right font-semibold text-green-600">
@@ -85,7 +85,7 @@ export default function Orders() {
                   <Package className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">Pedido #{selectedOrder.pedidoID}</h2>
+                  <h2 className="text-xl font-bold">Pedido #{selectedOrder.pedidoid}</h2>
                   <p className="text-xs text-blue-100">Consulta los detalles de tu compra</p>
                 </div>
               </div>
@@ -123,8 +123,8 @@ export default function Orders() {
                   Artículos en este pedido
                 </h3>
                 <div className="max-h-48 overflow-y-auto pr-2 space-y-2">
-                  {getDetallesPorPedido(selectedOrder.pedidoID).map((detalle, idx) => {
-                    const producto = productos.find(p => p.productoID === detalle.productoID);
+                  {getDetallesPorPedido(selectedOrder.pedidoid).map((detalle, idx) => {
+                    const producto = productos.find(p => p.productoid === detalle.productoid);
                     return (
                       <div key={idx} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
                         <div>

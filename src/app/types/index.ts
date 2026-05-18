@@ -73,7 +73,7 @@ export interface Pedido {
   fecha: string;
   total: number;
   estado: EstadoPedido;
-  clienteID: number;
+  clienteid: number;
 }
 
 export interface DetallePedido {
@@ -131,7 +131,7 @@ export interface Compra {
   estado: EstadoCompra;
   total: number;
   proveedorid: number;
-  usuarioID: number; // Usuario que realizó la compra
+  usuarioid: number; // Usuario que realizó la compra
 }
 
 export interface DetalleCompra {
