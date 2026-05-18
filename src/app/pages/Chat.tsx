@@ -1,6 +1,53 @@
+import { useState } from 'react';
 import { MessageSquare, Send, User } from 'lucide-react';
 
+// Definimos un tipo para los mensajes
+interface Message {
+  id: number;
+  text: string;
+  sender: 'user' | 'other';
+  time: string;
+}
+
 export default function Chat() {
+  // 1. Estado para almacenar la lista de mensajes
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      text: '¡Hola! Tengo una duda sobre los globos metálicos para un evento. ¿Qué tamaños manejan?',
+      sender: 'other',
+      time: '10:00 AM'
+    },
+    {
+      id: 2,
+      text: '¡Hola! Claro que sí, manejamos tamaños desde 18 hasta 36 pulgadas. ¿Buscas algún color en específico?',
+      sender: 'user',
+      time: '10:02 AM'
+    }
+  ]);
+
+  // 2. Estado para controlar lo que el usuario escribe en el input
+  const [inputText, setInputText] = useState('');
+
+  // 3. Función para enviar un mensaje nuevo
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault(); // Evita que la página se recargue
+    
+    if (inputText.trim() === '') return; // No enviar mensajes vacíos
+
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const newMessage: Message = {
+      id: Date.now(),
+      text: inputText,
+      sender: 'user', // Aquí asumimos que el que escribe es el usuario actual
+      time: currentTime
+    };
+
+    setMessages([...messages, newMessage]); // Agrega el nuevo mensaje a la lista
+    setInputText(''); // Limpia la caja de texto
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       
@@ -13,39 +60,48 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Área de mensajes (Historial visual) */}
+      {/* Área de mensajes (Historial dinámico) */}
       <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col gap-4">
         
-        {/* Mensaje Recibido */}
-        <div className="flex items-end gap-2">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mb-1">
-            <User className="w-5 h-5 text-gray-600" />
-          </div>
-          <div className="bg-gray-200 text-gray-800 p-3 rounded-2xl rounded-bl-none max-w-[75%] shadow-sm">
-            <p className="text-sm">¡Hola! Tengo una duda sobre los globos metálicos para un evento. ¿Qué tamaños manejan?</p>
-            <span className="text-[10px] text-gray-500 mt-1 block text-right">10:00 AM</span>
-          </div>
-        </div>
+        {/* Mapeamos el arreglo de mensajes para que se rendericen en la pantalla */}
+        {messages.map((msg) => (
+          <div 
+            key={msg.id} 
+            className={`flex items-end gap-2 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
+          >
+            {/* Avatar */}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+              msg.sender === 'user' ? 'bg-blue-500 text-white font-bold text-xs' : 'bg-gray-300'
+            }`}>
+              {msg.sender === 'user' ? 'Tú' : <User className="w-5 h-5 text-gray-600" />}
+            </div>
 
-        {/* Mensaje Enviado */}
-        <div className="flex items-end gap-2 flex-row-reverse">
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs mb-1">
-            Tú
+            {/* Burbuja de texto */}
+            <div className={`p-3 rounded-2xl max-w-[75%] shadow-sm ${
+              msg.sender === 'user' 
+                ? 'bg-blue-100 text-blue-900 rounded-br-none' 
+                : 'bg-gray-200 text-gray-800 rounded-bl-none'
+            }`}>
+              <p className="text-sm">{msg.text}</p>
+              <span className={`text-[10px] mt-1 block text-right ${
+                msg.sender === 'user' ? 'text-blue-500' : 'text-gray-500'
+              }`}>
+                {msg.time}
+              </span>
+            </div>
           </div>
-          <div className="bg-blue-100 text-blue-900 p-3 rounded-2xl rounded-br-none max-w-[75%] shadow-sm">
-            <p className="text-sm">¡Hola! Claro que sí, manejamos tamaños desde 18 hasta 36 pulgadas. ¿Buscas algún color en específico?</p>
-            <span className="text-[10px] text-blue-500 mt-1 block text-right">10:02 AM</span>
-          </div>
-        </div>
+        ))}
 
       </div>
 
-      {/* Caja de texto inferior (Input) */}
+      {/* Caja de texto inferior (Formulario reactivo) */}
       <div className="p-4 bg-white border-t border-gray-200">
-        <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+        <form className="flex gap-2" onSubmit={handleSendMessage}>
           <input
             type="text"
             placeholder="Escribe un mensaje aquí..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
             className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           />
           <button
