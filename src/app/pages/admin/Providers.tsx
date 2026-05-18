@@ -37,8 +37,8 @@ export default function AdminProviders() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {providersList.map((provider) => (
-              <tr key={provider.proveedorID} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-semibold text-gray-800">{provider.proveedorID}</td>
+              <tr key={provider.proveedorid} className="hover:bg-gray-50">
+                <td className="px-6 py-4 font-semibold text-gray-800">{provider.proveedorid}</td>
                 <td className="px-6 py-4 text-gray-600">{provider.empresa}</td>
                 <td className="px-6 py-4 text-gray-600">{provider.telefono}</td>
                 <td className="px-6 py-4 text-gray-600">{getDireccionCompleta(provider.direccion)}</td>
@@ -115,7 +115,7 @@ export default function AdminProviders() {
             <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setEditingProvider(null); }}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
-                <input type="text" defaultValue={editingProvider.proveedorID} disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none text-gray-500" />
+                <input type="text" defaultValue={editingProvider.proveedorid} disabled className="w-full border border-gray-300 bg-gray-50 rounded-lg p-2 outline-none text-gray-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la Empresa</label>

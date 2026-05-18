@@ -29,11 +29,11 @@ export default function AdminHome() {
   // Productos más vendidos
   const productSales: { [key: number]: { cantidad: number; total: number } } = {};
   detallesPedido.forEach(detalle => {
-    if (!productSales[detalle.productoID]) {
-      productSales[detalle.productoID] = { cantidad: 0, total: 0 };
+    if (!productSales[detalle.productoid]) {
+      productSales[detalle.productoid] = { cantidad: 0, total: 0 };
     }
-    productSales[detalle.productoID].cantidad += detalle.cantidad;
-    productSales[detalle.productoID].total += detalle.subtotal;
+    productSales[detalle.productoid].cantidad += detalle.cantidad;
+    productSales[detalle.productoid].total += detalle.subtotal;
   });
 
   const topProducts = Object.entries(productSales)
@@ -102,9 +102,9 @@ export default function AdminHome() {
           <div className="p-6">
             <div className="space-y-4">
               {pedidosRecientes.map((pedido) => {
-                const cliente = getClienteById(pedido.clienteID);
+                const cliente = getClienteById(pedido.clienteid);
                 return (
-                  <div key={pedido.pedidoID} className="flex items-start gap-3">
+                  <div key={pedido.pedidoid} className="flex items-start gap-3">
                     <div className={`p-2 rounded-lg ${
                       pedido.estado === 'Completado' ? 'bg-green-100' :
                       pedido.estado === 'En Proceso' ? 'bg-blue-100' :
@@ -117,7 +117,7 @@ export default function AdminHome() {
                       }`} />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">Pedido #{pedido.pedidoID}</p>
+                      <p className="font-semibold text-gray-800">Pedido #{pedido.pedidoid}</p>
                       <p className="text-sm text-gray-600">
                         {cliente ? getNombreCompleto(cliente.nombre) : 'Cliente desconocido'} - ${pedido.total.toFixed(2)}
                       </p>

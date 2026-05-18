@@ -50,12 +50,12 @@ export default function AdminPurchases() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {purchasesList.map((purchase) => {
-              const proveedor = getProveedorById(purchase.proveedorID);
-              const usuario = getUsuarioById(purchase.usuarioID);
+              const proveedor = getProveedorById(purchase.proveedorid);
+              const usuario = getUsuarioById(purchase.usuarioid);
               
               return (
-                <tr key={purchase.compraID} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold text-gray-800">{purchase.compraID}</td>
+                <tr key={purchase.compraid} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 font-semibold text-gray-800">{purchase.compraid}</td>
                   <td className="px-6 py-4 text-gray-600">{proveedor?.empresa}</td>
                   <td className="px-6 py-4 text-gray-600">{new Date(purchase.fecha).toLocaleDateString('es-MX')}</td>
                   <td className="px-6 py-4 text-gray-600">
@@ -161,7 +161,7 @@ export default function AdminPurchases() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-green-600 p-4 flex justify-between items-center text-white">
-              <h2 className="text-xl font-bold">Detalle de Compra #{viewingPurchase.compraID}</h2>
+              <h2 className="text-xl font-bold">Detalle de Compra #{viewingPurchase.compraid}</h2>
               <button onClick={() => setViewingPurchase(null)} className="hover:bg-green-700 p-1 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -170,11 +170,11 @@ export default function AdminPurchases() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Proveedor ID</p>
-                  <p className="text-gray-800">{viewingPurchase.proveedorID}</p>
+                  <p className="text-gray-800">{viewingPurchase.proveedorid}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Usuario ID (Solicitante)</p>
-                  <p className="text-gray-800">{viewingPurchase.usuarioID}</p>
+                  <p className="text-gray-800">{viewingPurchase.usuarioid}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Total</p>
@@ -204,7 +204,7 @@ export default function AdminPurchases() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
-              <h2 className="text-xl font-bold">Editar Compra #{editingPurchase.compraID}</h2>
+              <h2 className="text-xl font-bold">Editar Compra #{editingPurchase.compraid}</h2>
               <button onClick={() => setEditingPurchase(null)} className="hover:bg-blue-700 p-1 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -213,11 +213,11 @@ export default function AdminPurchases() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor ID</label>
-                  <input type="text" defaultValue={editingPurchase.proveedorID} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <input type="text" defaultValue={editingPurchase.proveedorid} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Usuario ID</label>
-                  <input type="text" defaultValue={editingPurchase.usuarioID} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <input type="text" defaultValue={editingPurchase.usuarioid} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -255,7 +255,7 @@ export default function AdminPurchases() {
             </div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">¿Eliminar Compra?</h2>
             <p className="text-gray-600 mb-6">
-              Estás a punto de eliminar la compra <strong>#{deletingPurchase.compraID}</strong> por <strong>${deletingPurchase.total.toFixed(2)}</strong>. Esta acción no se puede deshacer.
+              Estás a punto de eliminar la compra <strong>#{deletingPurchase.compraid}</strong> por <strong>${deletingPurchase.total.toFixed(2)}</strong>. Esta acción no se puede deshacer.
             </p>
             <div className="flex justify-center gap-3">
               <button 

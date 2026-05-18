@@ -64,13 +64,13 @@ export default function AdminPayments() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {paymentsList.map((payment) => {
-              const pedido = pedidos.find(p => p.pedidoID === payment.pedidoID);
-              const cliente = pedido ? getClienteById(pedido.clienteID) : null;
+              const pedido = pedidos.find(p => p.pedidoid === payment.pedidoid);
+              const cliente = pedido ? getClienteById(pedido.clienteid) : null;
               
               return (
-                <tr key={payment.pagoID} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold text-gray-800">{payment.pagoID}</td>
-                  <td className="px-6 py-4 text-gray-600">#{payment.pedidoID}</td>
+                <tr key={payment.pagoid} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 font-semibold text-gray-800">{payment.pagoid}</td>
+                  <td className="px-6 py-4 text-gray-600">#{payment.pedidoid}</td>
                   <td className="px-6 py-4 text-gray-600">
                     {cliente ? getNombreCompleto(cliente.nombre) : '-'}
                   </td>
@@ -172,7 +172,7 @@ export default function AdminPayments() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
-              <h2 className="text-xl font-bold">Detalle del Pago #{selectedPayment.pagoID}</h2>
+              <h2 className="text-xl font-bold">Detalle del Pago #{selectedPayment.pagoid}</h2>
               <button onClick={() => setSelectedPayment(null)} className="hover:bg-blue-700 p-1 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -182,11 +182,11 @@ export default function AdminPayments() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">ID del Pago</p>
-                  <p className="text-gray-800">{selectedPayment.pagoID}</p>
+                  <p className="text-gray-800">{selectedPayment.pagoid}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium">ID del Pedido</p>
-                  <p className="text-gray-800">#{selectedPayment.pedidoID}</p>
+                  <p className="text-gray-800">#{selectedPayment.pedidoid}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Monto</p>

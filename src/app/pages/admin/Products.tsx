@@ -39,12 +39,12 @@ export default function AdminProducts() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {productsList.map((product) => (
-              <tr key={product.productoID} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-semibold text-gray-800">{product.productoID}</td>
+              <tr key={product.productoid} className="hover:bg-gray-50">
+                <td className="px-6 py-4 font-semibold text-gray-800">{product.productoid}</td>
                 <td className="px-6 py-4 text-gray-600">{product.nombre}</td>
                 <td className="px-6 py-4 text-gray-600">{product.tipo}</td>
                 <td className="px-6 py-4 text-gray-600">
-                  {getCategoriaById(product.categoriaID)?.nombre}
+                  {getCategoriaById(product.categoriaid)?.nombre}
                 </td>
                 <td className="px-6 py-4 text-right font-semibold text-green-600">
                   ${product.precio.toFixed(2)}
@@ -148,7 +148,7 @@ export default function AdminProducts() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Categoría ID</label>
-                  <input type="number" defaultValue={editingProduct.categoriaID} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <input type="number" defaultValue={editingProduct.categoriaid} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

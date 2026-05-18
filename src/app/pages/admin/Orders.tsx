@@ -48,11 +48,11 @@ export default function AdminOrders() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {ordersList.map((order) => {
-              const cliente = getClienteById(order.clienteID);
+              const cliente = getClienteById(order.clienteid);
               
               return (
-                <tr key={order.pedidoID} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold text-gray-800">{order.pedidoID}</td>
+                <tr key={order.pedidoid} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 font-semibold text-gray-800">{order.pedidoid}</td>
                   <td className="px-6 py-4 text-gray-600">
                     {cliente ? getNombreCompleto(cliente.nombre) : '-'}
                   </td>
@@ -135,7 +135,7 @@ export default function AdminOrders() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
             <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
-              <h2 className="text-xl font-bold">Detalle del Pedido #{viewingOrder.pedidoID}</h2>
+              <h2 className="text-xl font-bold">Detalle del Pedido #{viewingOrder.pedidoid}</h2>
               <button onClick={() => setViewingOrder(null)} className="hover:bg-blue-700 p-1 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -146,7 +146,7 @@ export default function AdminOrders() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Cliente ID</p>
-                  <p className="text-gray-800">{viewingOrder.clienteID}</p>
+                  <p className="text-gray-800">{viewingOrder.clienteid}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Fecha de Registro</p>
