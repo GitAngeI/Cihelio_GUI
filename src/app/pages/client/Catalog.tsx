@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, ShoppingCart, CheckCircle } from 'lucide-react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { productos, getCategoriaById } from '../../data/mockData';
-import { Producto } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 // Imágenes de productos desde Unsplash
 const productImages: {[key: number]: string} = {
@@ -22,10 +21,20 @@ const productImages: {[key: number]: string} = {
 
 export default function Catalog() {
   const [cart, setCart] = useState<{[key: number]: number}>({});
+  const [productosDb, setProductosDb] = useState<any[]>([]);
   
-  // Variables para controlar la notificación flotante (Toast)
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+
+  // 1. LEER PRODUCTOS DE SUPABASE
+  useEffect(() => {
+    const fetchProductos = async () => {
+      // Hacemos un join rápido para traernos el nombre de la categoría también
+      const { data } = await supabase.from('producto').select('*, categoria(nombre)');
+      if (data) setProductosDb(data);
+    };
+    fetchProductos();
+  }, []);
 
   const addToCart = (productId: number, productName: string) => {
     setCart(prev => ({
@@ -52,9 +61,7 @@ export default function Catalog() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {productos.map((product) => {
-          const categoria = getCategoriaById(product.categoriaid);
-          
+        {productosDb.map((product) => {
           return (
             <div key={product.productoid} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
               <div className="h-48 overflow-hidden bg-gray-200">
@@ -66,7 +73,8 @@ export default function Catalog() {
               </div>
               <div className="p-4">
                 <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                  {categoria?.nombre || product.tipo}
+                  {/* Usa el nombre de la categoría si existe, si no, usa el tipo */}
+                  {product.categoria?.nombre || product.tipo}
                 </span>
                 <h3 className="text-lg font-semibold mt-2 text-gray-800">{product.nombre}</h3>
                 <p className="text-sm text-gray-600 mt-1">{product.tipo}</p>
