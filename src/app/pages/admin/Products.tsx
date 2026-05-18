@@ -130,22 +130,22 @@ export default function AdminProducts() {
             <form className="p-6 space-y-4" onSubmit={handleCreate}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
-                <input required name="nombre" type="text" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
+                <input required name="nombre" placeholder="Ej. Globo Infantil" type="text" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
               </div>
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                  <input name="tipo" type="text" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
+                  <input name="tipo" type="text" placeholder="Ej. Metalico" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                  <input required name="precio" type="number" step="0.01" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
+                  <input required name="precio" placeholder="Ej. 20.00" type="number" step="0.01" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Stock Inicial</label>
-                  <input required name="stock" type="number" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
+                  <input required name="stock" placeholder="Ej. 100" type="number" className="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-4 pt-2 border-t">
