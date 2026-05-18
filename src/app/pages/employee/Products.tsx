@@ -30,7 +30,6 @@ export default function EmployeeProducts() {
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tipo</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Categoría</th>
               <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Precio</th>
               <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Stock</th>
               <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Acciones</th>
@@ -45,7 +44,6 @@ export default function EmployeeProducts() {
                   <td className="px-6 py-4 font-semibold text-gray-800">{product.productoid}</td>
                   <td className="px-6 py-4 text-gray-600">{product.nombre}</td>
                   <td className="px-6 py-4 text-gray-600">{product.tipo}</td>
-                  <td className="px-6 py-4 text-gray-600">{categoria?.nombre || '-'}</td>
                   <td className="px-6 py-4 text-right font-semibold text-green-600">
                     ${product.precio.toFixed(2)}
                   </td>
@@ -90,14 +88,10 @@ export default function EmployeeProducts() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
                 <input type="text" placeholder="Ej. Globo Metálico Estrella" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                   <input type="text" placeholder="Ej. Metálico" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría ID</label>
-                  <input type="number" placeholder="Ej. 1" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -134,14 +128,10 @@ export default function EmployeeProducts() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
                 <input type="text" defaultValue={editingProduct.nombre} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                   <input type="text" defaultValue={editingProduct.tipo} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría ID</label>
-                  <input type="number" defaultValue={editingProduct.categoriaid} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
