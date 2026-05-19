@@ -20,36 +20,58 @@ const productImages: {[key: number]: string} = {
 };
 
 export default function Catalog() {
-  const [cart, setCart] = useState<{[key: number]: number}>({});
+  // El carrito ahora guarda el objeto completo del producto
+  const [cart, setCart] = useState<{[key: number]: any}>({});
   const [productosDb, setProductosDb] = useState<any[]>([]);
   
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
 
-  // 1. LEER PRODUCTOS DE SUPABASE
+  // 1. CARGAR PRODUCTOS Y CARRITO GUARDADO
   useEffect(() => {
+    // Leemos si el usuario ya tenía cosas en su carrito
+    const savedCart = localStorage.getItem('cihelio_cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+
     const fetchProductos = async () => {
-      // Hacemos un join rápido para traernos el nombre de la categoría también
-      const { data } = await supabase.from('producto').select('*, categoria(nombre)');
+      const { data } = await supabase.from('producto').select('*');
       if (data) setProductosDb(data);
     };
     fetchProductos();
   }, []);
 
-  const addToCart = (productId: number, productName: string) => {
-    setCart(prev => ({
-      ...prev,
-      [productId]: (prev[productId] || 0) + 1
-    }));
+  // 2. LÓGICA REAL PARA AGREGAR AL CARRITO
+  const addToCart = (product: any) => {
+    setCart(prev => {
+      const newCart = { ...prev };
+      
+      // Si el globo ya estaba en el carrito, le sumamos 1 a la cantidad
+      if (newCart[product.productoid]) {
+        newCart[product.productoid].cantidad += 1;
+      } else {
+        // Si no estaba, guardamos toda su información
+        newCart[product.productoid] = {
+          productoid: product.productoid,
+          nombre: product.nombre,
+          precio: Number(product.precio),
+          cantidad: 1
+        };
+      }
+      
+      // GUARDAMOS EN LOCALSTORAGE
+      localStorage.setItem('cihelio_cart', JSON.stringify(newCart));
+      return newCart;
+    });
     
-    // Mostramos la notificación por 3 segundos
-    setToastMessage(`¡${productName} agregado al carrito!`);
+    setToastMessage(`¡${product.nombre} agregado al carrito!`);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
+  const cartCount = Object.values(cart).reduce((sum: any, item: any) => sum + item.cantidad, 0);
+  
   return (
     <div className="relative">
       <div className="flex items-center justify-between mb-6">
@@ -73,18 +95,18 @@ export default function Catalog() {
               </div>
               <div className="p-4">
                 <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                  {/* Usa el nombre de la categoría si existe, si no, usa el tipo */}
-                  {product.categoria?.nombre || product.tipo}
+                  {product.tipo}
                 </span>
                 <h3 className="text-lg font-semibold mt-2 text-gray-800">{product.nombre}</h3>
                 <p className="text-sm text-gray-600 mt-1">{product.tipo}</p>
                 <div className="flex items-center justify-between mt-4">
                   <div>
-                    <p className="text-2xl font-bold text-green-600">${product.precio.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">${Number(product.precio).toFixed(2)}</p>
                     <p className="text-xs text-gray-500">Stock: {product.stock}</p>
                   </div>
                   <button
-                    onClick={() => addToCart(product.productoid, product.nombre)}
+                    // Pasamos el objeto completo a la función
+                    onClick={() => addToCart(product)}
                     className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors shadow-sm"
                     disabled={product.stock === 0}
                     title="Agregar al carrito"
@@ -94,7 +116,7 @@ export default function Catalog() {
                 </div>
                 {cart[product.productoid] && (
                   <div className="mt-3 text-center bg-green-50 text-green-700 border border-green-100 py-1 rounded text-sm font-medium">
-                    {cart[product.productoid]} en el carrito
+                    {cart[product.productoid].cantidad} en el carrito
                   </div>
                 )}
               </div>
