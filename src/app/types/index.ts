@@ -21,7 +21,7 @@ export interface Direccion {
 // ============================================================================
 
 export interface Usuario {
-  usuarioID: number;
+  usuarioid: number;
   nombre: Nombre;
   correo: string;
   contraseña: string;
@@ -32,7 +32,7 @@ export interface Administrador extends Usuario {
 }
 
 export interface Cliente {
-  clienteID: number; // Puede ser FK de Usuario
+  clienteid: number; // Puede ser FK de Usuario
   nombre: Nombre;
   correo: string;
   telefono: string;
@@ -44,17 +44,17 @@ export interface Cliente {
 // ============================================================================
 
 export interface Categoria {
-  categoriaID: number;
+  categoriaid: number;
   nombre: string;
 }
 
 export interface Producto {
-  productoID: number;
+  productoid: number;
   nombre: string;
   precio: number;
   stock: number;
   tipo: string;
-  categoriaID: number;
+  categoriaid: number;
 }
 
 // ============================================================================
@@ -69,16 +69,16 @@ export type EstadoPedido =
   | "Entregado";
 
 export interface Pedido {
-  pedidoID: number;
+  pedidoid: number;
   fecha: string;
   total: number;
   estado: EstadoPedido;
-  clienteID: number;
+  clienteid: number;
 }
 
 export interface DetallePedido {
-  pedidoID: number;
-  productoID: number;
+  pedidoid: number;
+  productoid: number;
   cantidad: number;
   precio_venta: number;
   subtotal: number;
@@ -100,12 +100,12 @@ export type EstadoPago =
   | "Reembolsado";
 
 export interface Pago {
-  pagoID: number;
+  pagoid: number;
   tipo: TipoPago;
   monto: number;
   fecha: string;
   estado: EstadoPago;
-  pedidoID: number;
+  pedidoid: number;
 }
 
 // ============================================================================
@@ -113,7 +113,7 @@ export interface Pago {
 // ============================================================================
 
 export interface Proveedor {
-  proveedorID: number;
+  proveedorid: number;
   empresa: string;
   telefono: string;
   direccion: Direccion;
@@ -126,17 +126,17 @@ export type EstadoCompra =
   | "Cancelada";
 
 export interface Compra {
-  compraID: number;
+  compraid: number;
   fecha: string;
   estado: EstadoCompra;
   total: number;
-  proveedorID: number;
-  usuarioID: number; // Usuario que realizó la compra
+  proveedorid: number;
+  usuarioid: number; // Usuario que realizó la compra
 }
 
 export interface DetalleCompra {
-  compraID: number;
-  productoID: number;
+  compraid: number;
+  productoid: number;
   cantidad: number;
   costo_unitario: number;
   unidad_medida: string;

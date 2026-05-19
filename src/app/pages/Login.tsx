@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import logo from '../../imports/image.png';
+import { supabase } from '../lib/supabase';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -9,15 +10,50 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [errorMsg, setErrorMsg] = useState(''); // Estado para capturar errores visuales
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulación de login basado en email
-    if (email.includes('admin')) {
-      navigate('/admin');
-    } else if (email.includes('empleado') || email.includes('employee')) {
-      navigate('/empleado');
-    } else {
-      navigate('/cliente');
+    setErrorMsg('');
+
+    try {
+      // 1. Buscar manualmente el usuario por correo y contraseña en la tabla
+      const { data: usuario, error: userError } = await supabase
+        .from('usuario')
+        .select('*')
+        .eq('correo', email)
+        .eq('contrasena', password)
+        .maybeSingle(); // Trae un solo registro o null si no existe
+
+      if (userError) throw userError;
+
+      // Si no se encontró ningún usuario con esos datos
+      if (!usuario) {
+        setErrorMsg('El correo o la contraseña son incorrectos.');
+        return;
+      }
+
+      // 2. Si el usuario existe, comprobar si su usuarioid está en la tabla administrador
+      const { data: admin, error: adminError } = await supabase
+        .from('administrador')
+        .select('*')
+        .eq('usuarioid', usuario.usuarioid)
+        .maybeSingle();
+
+      if (adminError) throw adminError;
+
+      // 3. Redirección inteligente basada en los roles
+      if (admin) {
+        navigate('/admin');
+      } else if (email.includes('empleado') || email.includes('employee')) {
+        navigate('/empleado');
+      } else {
+        navigate('/cliente');
+      }
+
+    } catch (error) {
+      console.error(error);
+      setErrorMsg('Error de comunicación con el servidor.');
     }
   };
 
@@ -73,6 +109,12 @@ export default function Login() {
             </div>
           </div>
 
+          {errorMsg && (
+            <p className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg">
+              {errorMsg}
+            </p>
+          )}
+          
           <button
             type="submit"
             className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"

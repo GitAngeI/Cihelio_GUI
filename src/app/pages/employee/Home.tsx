@@ -2,16 +2,16 @@ import { Package, ShoppingBag, TrendingUp, Clock } from 'lucide-react';
 
 export default function EmployeeHome() {
   const stats = [
-    { label: 'Pedidos Hoy', value: '12', icon: Package, color: 'bg-blue-500' },
-    { label: 'Productos', value: '45', icon: ShoppingBag, color: 'bg-green-500' },
-    { label: 'Ventas del Día', value: '$2,400', icon: TrendingUp, color: 'bg-purple-500' },
-    { label: 'Pendientes', value: '5', icon: Clock, color: 'bg-yellow-500' },
+    { label: 'Pedidos Hoy', value: '2', icon: Package, color: 'bg-blue-500' },
+    { label: 'Productos', value: '12', icon: ShoppingBag, color: 'bg-green-500' },
+    { label: 'Ventas del Día', value: '$1,400', icon: TrendingUp, color: 'bg-purple-500' },
+    { label: 'Pendientes', value: '3', icon: Clock, color: 'bg-yellow-500' },
   ];
 
   const recentOrders = [
-    { id: 1, client: 'Juan Pérez', date: '25/04/2024', total: 200.00, status: 'pending' },
-    { id: 2, client: 'María Gómez', date: '25/04/2024', total: 350.00, status: 'completed' },
-    { id: 3, client: 'Carlos López', date: '25/04/2024', total: 150.00, status: 'processing' },
+    { id: 6, client: 'Patricia Morales Vega', date: '23/03/2026', total: 340.00, status: 'pending' },
+    { id: 5, client: 'Roberto Ramírez Cruz', date: '22/03/2026', total: 890.00, status: 'completed' },
+    { id: 4, client: 'Ana luisa Perez Gutierrez', date: '21/03/2026', total: 180.00, status: 'processing' },
   ];
 
   return (
