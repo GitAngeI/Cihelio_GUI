@@ -1,51 +1,76 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, User } from 'lucide-react';
 
-// Definimos un tipo para los mensajes
+// AQUÍ IMPORTAMOS LAS FUNCIONES DE TU COMPAÑERO
+// Nota: Ajusta la ruta ('../../chatService') dependiendo de en qué carpeta guardó él ese archivo
+import { enviarMensaje, obtenerMensajes } from '../../chatService'; 
+
 interface Message {
-  id: number;
+  id: string | number;
   text: string;
   sender: 'user' | 'other';
   time: string;
 }
 
 export default function Chat() {
-  // 1. Estado para almacenar la lista de mensajes
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: '¡Hola! Tengo una duda sobre los globos metálicos para un evento. ¿Qué tamaños manejan?',
-      sender: 'other',
-      time: '10:00 AM'
-    },
-    {
-      id: 2,
-      text: '¡Hola! Claro que sí, manejamos tamaños desde 18 hasta 36 pulgadas. ¿Buscas algún color en específico?',
-      sender: 'user',
-      time: '10:02 AM'
-    }
-  ]);
-
-  // 2. Estado para controlar lo que el usuario escribe en el input
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 3. Función para enviar un mensaje nuevo
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página se recargue
-    
-    if (inputText.trim() === '') return; // No enviar mensajes vacíos
+  // 1. Obtener mensajes de la base de datos al abrir el chat
+  useEffect(() => {
+    const cargarHistorial = async () => {
+      try {
+        // Usamos la función que programó tu compañero
+        const data = await obtenerMensajes(); 
+        
+        if (data) {
+          const formattedMessages: Message[] = data.map((msg: any) => ({
+  id: msg.id,
+  text: msg.text,
+  // Aquí está el secreto: agregamos 'as "user" | "other"'
+  sender: (msg.sender_id === 'TU_ID_DE_USUARIO' ? 'user' : 'other') as "user" | "other",
+  time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}));
 
-    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    const newMessage: Message = {
-      id: Date.now(),
-      text: inputText,
-      sender: 'user', // Aquí asumimos que el que escribe es el usuario actual
-      time: currentTime
+setMessages(formattedMessages);
+        }
+      } catch (error) {
+        console.error("Error al cargar mensajes:", error);
+      }
     };
 
-    setMessages([...messages, newMessage]); // Agrega el nuevo mensaje a la lista
-    setInputText(''); // Limpia la caja de texto
+    cargarHistorial();
+  }, []);
+
+  // Auto-scroll para que baje automáticamente cuando hay nuevos mensajes
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // 2. Enviar mensaje usando la lógica de tu compañero
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault(); // Evita que se recargue la página
+    if (inputText.trim() === '') return;
+
+    try {
+      // Mandamos el mensaje a Supabase usando la función de tu compañero
+      await enviarMensaje(inputText, 'TU_ID_DE_USUARIO'); 
+      
+      // Actualizamos la pantalla de inmediato para que el usuario vea su mensaje
+      const nuevoMensaje: Message = {
+        id: Date.now(),
+        text: inputText,
+        sender: 'user',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      
+      setMessages((prev) => [...prev, nuevoMensaje]);
+      setInputText(''); // Limpiamos la caja de texto
+      
+    } catch (error) {
+      console.error('Error al enviar el mensaje:', error);
+    }
   };
 
   return (
@@ -60,23 +85,19 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Área de mensajes (Historial dinámico) */}
+      {/* Área de mensajes (Historial visual) */}
       <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col gap-4">
-        
-        {/* Mapeamos el arreglo de mensajes para que se rendericen en la pantalla */}
         {messages.map((msg) => (
           <div 
             key={msg.id} 
             className={`flex items-end gap-2 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
           >
-            {/* Avatar */}
             <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
               msg.sender === 'user' ? 'bg-blue-500 text-white font-bold text-xs' : 'bg-gray-300'
             }`}>
               {msg.sender === 'user' ? 'Tú' : <User className="w-5 h-5 text-gray-600" />}
             </div>
 
-            {/* Burbuja de texto */}
             <div className={`p-3 rounded-2xl max-w-[75%] shadow-sm ${
               msg.sender === 'user' 
                 ? 'bg-blue-100 text-blue-900 rounded-br-none' 
@@ -91,11 +112,13 @@ export default function Chat() {
             </div>
           </div>
         ))}
-
+        {/* Referencia para el auto-scroll */}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Caja de texto inferior (Formulario reactivo) */}
+      {/* Caja de texto inferior (Input) */}
       <div className="p-4 bg-white border-t border-gray-200">
+        {/* Aquí conectamos la función de enviar al formulario */}
         <form className="flex gap-2" onSubmit={handleSendMessage}>
           <input
             type="text"
